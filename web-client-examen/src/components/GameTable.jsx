@@ -1,9 +1,18 @@
-import {useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
+import {makeMove, startGame} from "../api/rest-calls.js";
+import {getCurrentUser, getGameData, setGameData} from "../api/globals.js";
+import {getNotificationHandler} from "../api/notification-handler.js";
 
-let gameStatus = "NONE";
+let gameStarted = false;
 
 function GameCell( {handleCellClicked, id} ) {
     const td = useRef(null);
+
+    useEffect(() => {
+        if (getGameData() === null) {
+            gameStarted = false;
+        }
+    }, []);
 
     function handleFocus() {
         if (gameStarted) return;
@@ -31,8 +40,72 @@ function GameCell( {handleCellClicked, id} ) {
 }
 
 export default function GameTable() {
-    const [coordinates, setCoordinates] = useState({"x":0, "y":0});
+    let coordinates = {"x":0, "y":0};
     let clickedCellId = 0;
+    const [userStateMessage, setUserStateMessage] = useState("");
+
+    function handleNewMove(coord) {
+        let hitCellId = coord.x * 10 + coord.y;
+        document.getElementById(hitCellId).classList.add("hit-cell");
+        setUserStateMessage("Your turn");
+    }
+
+    function handleGameStart() {
+        if (getCurrentUser().id === getGameData().activePlayerId) {
+            setUserStateMessage("Your turn");
+        } else {
+            setUserStateMessage("Wait")
+        }
+    }
+
+    function handleGameEnded() {
+        if (getCurrentUser().id === getGameData().winnerId) {
+            alert("YOU WON!");
+        } else {
+            alert("You lost this time...");
+        }
+        gameStarted = false;
+    }
+
+    let notificationHandler = getNotificationHandler();
+    notificationHandler.setNewMoveCallBack(handleNewMove);
+    notificationHandler.setGameStartedCallBack(handleGameStart);
+    notificationHandler.setGameEndedCallBack(handleGameEnded);
+
+    function handleStartGame() {
+        if (gameStarted) return;
+        gameStarted = true;
+
+        startGame(coordinates);
+
+        let clickedCell = document.getElementById(clickedCellId);
+        clickedCell.style.backgroundColor = "cyan";
+        clickedCell.innerText = "^\n|";
+
+        setUserStateMessage("Waiting for players");
+    }
+
+    function handleCellClicked(id) {
+        clickedCellId = id;
+
+        let x = Math.floor(clickedCellId / 10);
+        let y = clickedCellId % 10;
+
+        coordinates = {"x": x, "y": y};
+        console.log(coordinates);
+
+        if (gameStarted && getCurrentUser().id === getGameData().activePlayerId) {
+            makeMove(coordinates).then(() => {
+                let newGameData = getGameData();
+                newGameData.activePlayerId = null;
+                setGameData(newGameData);
+
+                let clickedCell = document.getElementById(clickedCellId);
+                clickedCell.innerText = "X";
+                setUserStateMessage("Wait")
+            });
+        }
+    }
 
     const tbody = () => {
         let content = [];
@@ -48,23 +121,9 @@ export default function GameTable() {
         return content;
     }
 
-    function handleStartGame() {
-        gameStarted = true;
-        let clickedCell = document.getElementById(clickedCellId);
-        clickedCell.style.backgroundColor = "cyan";
-        clickedCell.innerText = "^\n|";
-    }
-
-    function handleCellClicked(id) {
-        clickedCellId = id;
-        console.log(clickedCellId);
-        if (gameStarted) {
-
-        }
-    }
-
     return (
         <>
+            <h3>{userStateMessage}</h3>
             <div className="table-container">
                 <table>
                     <tbody>

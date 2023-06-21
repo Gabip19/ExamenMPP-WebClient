@@ -1,5 +1,5 @@
 import {
-    GAME_BASE_URL, getGameData,
+    GAME_BASE_URL, getCurrentUser, getGameData,
     getSessionId,
     LOGIN_URL,
     LOGOUT_URL,
@@ -8,6 +8,7 @@ import {
     unsetCurrentUser, unsetGameData,
     unsetSessionId
 } from "./globals.js";
+import {closeWebSocket} from "./websocket-calls.js";
 
 
 function status(response) {
@@ -65,6 +66,7 @@ export function logout() {
             unsetSessionId();
             unsetCurrentUser();
             unsetGameData();
+            closeWebSocket();
         })
         .catch(error => {
             console.log("Request failed: ", error);
@@ -73,6 +75,7 @@ export function logout() {
 }
 
 export function startGame(coordinates) {
+    console.log(coordinates);
     let headers = new Headers();
     headers.append("Accept", "application/json");
     headers.append("Content-Type", "application/json");
@@ -85,12 +88,11 @@ export function startGame(coordinates) {
         body: JSON.stringify(coordinates)
     };
 
-    return fetch(GAME_BASE_URL, init)
+    fetch(GAME_BASE_URL, init)
         .then(status)
         .then((response) => response.json())
         .then((data) => {
             setGameData(data);
-            return data;
         })
         .catch(error => {
             console.log("Request failed: ", error);
@@ -111,8 +113,9 @@ export function makeMove(coordinates) {
         body: JSON.stringify(coordinates)
     };
 
-    return fetch(GAME_BASE_URL + "/" + getGameData().id + "/moves", init)
+    return fetch(GAME_BASE_URL + "/" + getGameData().gameId + "/moves", init)
         .then(status)
+        .then(() => getGameData().activePlayerId = getCurrentUser().id)
         .catch(error => {
             console.log("Request failed: ", error);
             return Promise.reject(error);

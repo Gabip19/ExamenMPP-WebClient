@@ -1,6 +1,7 @@
 import {useState} from "react";
 import {login} from "../api/rest-calls.js";
 import {getCurrentUser, getSessionId} from "../api/globals.js";
+import {openWebSocketConnection} from "../api/websocket-calls.js";
 
 export default function LoginForm({ setLoggedIn }) {
     const [name, setName] = useState("");
@@ -25,6 +26,7 @@ export default function LoginForm({ setLoggedIn }) {
             console.log(getSessionId());
             console.log(getCurrentUser());
             setLoggedIn(true);
+            openWebSocketConnection();
         });
     }
 
