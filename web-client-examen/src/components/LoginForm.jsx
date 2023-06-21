@@ -1,8 +1,8 @@
 import {useState} from "react";
-import {login} from "../rest-api/rest-calls.js";
-import {currentUser, sessionId} from "../rest-api/globals.js";
+import {login} from "../api/rest-calls.js";
+import {getCurrentUser, getSessionId} from "../api/globals.js";
 
-export default function LoginForm() {
+export default function LoginForm({ setLoggedIn }) {
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
 
@@ -22,9 +22,9 @@ export default function LoginForm() {
         console.log(credentials);
 
         login(credentials).then(() => {
-            console.log(currentUser);
-            console.log(sessionId);
-            window.location = "/game/";
+            console.log(getSessionId());
+            console.log(getCurrentUser());
+            setLoggedIn(true);
         });
     }
 

@@ -67,3 +67,31 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+
+.table-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.table-container table {
+  border: 1px solid gray;
+}
+
+.table-container td {
+  width: 100px;
+  height: 100px;
+  text-align: center;
+  border: 1px solid gray;
+  color: black;
+  line-height: 2px;
+}
+
+.selected {
+  background-color: red;
+}
+
+.unselected {
+  background-color: transparent;
+}
