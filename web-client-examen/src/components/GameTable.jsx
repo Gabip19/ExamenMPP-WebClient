@@ -1,17 +1,17 @@
 import {useEffect, useRef, useState} from "react";
 import {makeMove, startGame} from "../api/rest-calls.js";
-import {getCurrentUser, getGameData, setGameData} from "../api/globals.js";
-import {getNotificationHandler} from "../api/notification-handler.js";
+import {getCurrentUser, getGameData} from "../api/globals.js";
 
-let gameStarted = false;
+let gameStarted = true;
 
 function GameCell( {handleCellClicked, id} ) {
     const td = useRef(null);
 
     useEffect(() => {
-        if (getGameData() === null) {
-            gameStarted = false;
-        }
+        // if (getGameData() === null) {
+        //     gameStarted = false;
+        // }
+        gameStarted = true;
     }, []);
 
     function handleFocus() {
@@ -42,6 +42,7 @@ function GameCell( {handleCellClicked, id} ) {
 export default function GameTable() {
     let coordinates = {"x":0, "y":0};
     let clickedCellId = 0;
+    const [score, setScore] = useState(0);
     const [userStateMessage, setUserStateMessage] = useState("");
 
     function handleNewMove(coord) {
@@ -49,7 +50,6 @@ export default function GameTable() {
         document.getElementById(hitCellId).classList.add("hit-cell");
         setUserStateMessage("Your turn");
     }
-
     function handleGameStart() {
         if (getCurrentUser().id === getGameData().activePlayerId) {
             setUserStateMessage("Your turn");
@@ -57,7 +57,6 @@ export default function GameTable() {
             setUserStateMessage("Wait")
         }
     }
-
     function handleGameEnded() {
         if (getCurrentUser().id === getGameData().winnerId) {
             alert("YOU WON!");
@@ -66,12 +65,10 @@ export default function GameTable() {
         }
         gameStarted = false;
     }
-
-    let notificationHandler = getNotificationHandler();
-    notificationHandler.setNewMoveCallBack(handleNewMove);
-    notificationHandler.setGameStartedCallBack(handleGameStart);
-    notificationHandler.setGameEndedCallBack(handleGameEnded);
-
+    // let notificationHandler = getNotificationHandler();
+    // notificationHandler.setNewMoveCallBack(handleNewMove);
+    // notificationHandler.setGameStartedCallBack(handleGameStart);
+    // notificationHandler.setGameEndedCallBack(handleGameEnded);
     function handleStartGame() {
         if (gameStarted) return;
         gameStarted = true;
@@ -85,6 +82,7 @@ export default function GameTable() {
         setUserStateMessage("Waiting for players");
     }
 
+
     function handleCellClicked(id) {
         clickedCellId = id;
 
@@ -94,27 +92,42 @@ export default function GameTable() {
         coordinates = {"x": x, "y": y};
         console.log(coordinates);
 
-        if (gameStarted && getCurrentUser().id === getGameData().activePlayerId) {
+        if (gameStarted && x === getGameData().level) {
             makeMove(coordinates).then(() => {
-                let newGameData = getGameData();
-                newGameData.activePlayerId = null;
-                setGameData(newGameData);
-
                 let clickedCell = document.getElementById(clickedCellId);
                 clickedCell.innerText = "X";
-                setUserStateMessage("Wait")
+                setScore(getGameData().score);
+            }).then(() => {
+                if (getGameData().gameStatus === "ENDED") {
+                    if (getGameData().level === 4) {
+                        alert("You won!");
+                    } else {
+                        alert("You lost!");
+                    }
+                    showMines(getGameData().mines);
+                }
             });
         }
     }
 
+    function showMines(mines) {
+        mines.forEach((coord) => {
+            let cellId = coord.x * 10 + coord.y;
+            document.getElementById(cellId).classList.add("hit-cell");
+        })
+    }
+
     const tbody = () => {
         let content = [];
-        for (let i = 0; i < 3; i++) {
+        for (let i = 1; i <= 4; i++) {
             let cells = [];
-            for (let j = 0; j < 3; j++) {
-                cells.push(<GameCell key={i * 10 + j}
-                                     id={i * 10 + j}
-                                     handleCellClicked={() => handleCellClicked(i * 10 + j)}/>)
+            for (let j = 1; j <= 4; j++) {
+                cells.push(
+                    <GameCell key={i * 10 + j}
+                              id={i * 10 + j}
+                              handleCellClicked={() => handleCellClicked(i * 10 + j)}
+                    />
+                )
             }
             content.push(<tr key={"row"+i}>{cells}</tr>);
         }
@@ -123,15 +136,14 @@ export default function GameTable() {
 
     return (
         <>
-            <h3>{userStateMessage}</h3>
-            <div className="table-container">
+            <h3>Score: {score}</h3>
+            <div className="table-container center-container">
                 <table>
                     <tbody>
                         {tbody()}
                     </tbody>
                 </table>
             </div>
-            <button onClick={handleStartGame}> Start Game </button> <br/>
         </>
     );
 }

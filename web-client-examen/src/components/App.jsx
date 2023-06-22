@@ -1,20 +1,39 @@
 import {useEffect, useState} from 'react'
 import '../css/App.css'
 import LoginForm from "./LoginForm.jsx";
-import {getCurrentUser} from "../api/globals.js";
-import {logout} from "../api/rest-calls.js";
+import {getCurrentUser, getSessionId} from "../api/globals.js";
+import {getGamesTop, login, logout, startGame} from "../api/rest-calls.js";
 import GameTable from "./GameTable.jsx";
+import TopTable from "./TopTable.jsx";
+import {closeWebSocket, openWebSocketConnection} from "../api/websocket-calls.js";
+import {getNotificationHandler} from "../api/notification-handler.js";
 
 function App() {
     const [loggedIn, setLoggedIn] = useState(false);
+    const [gamesTop, setGamesTop] = useState([{"gameId":"0", "player":{"name":"-"},"score":0, "duration":0}]);
+
+    let notificationHandler = getNotificationHandler();
+    notificationHandler.setGameEndedCallBack(setGamesTop);
 
     useEffect(() => {
         if (getCurrentUser() !== null) {
             setLoggedIn(true);
         } else {
             setLoggedIn(false);
+            closeWebSocket();
         }
     });
+
+    function handleLogin(credentials) {
+        login(credentials).then(() => {
+            setLoggedIn(true);
+            console.log("[SESSION_ID]: " + getSessionId());
+            console.log("[CURRENT_USER]: "); console.log(getCurrentUser());
+            openWebSocketConnection();
+        }).then(() => {
+            getGamesTop().then((games) => setGamesTop(games));
+        }).then(() => startGame());
+    }
 
     function handleLogout() {
         logout().then(() => setLoggedIn(false));
@@ -23,7 +42,7 @@ function App() {
     if (loggedIn === false) {
         return (
             <>
-                <LoginForm setLoggedIn={setLoggedIn}></LoginForm>
+                <LoginForm handleLogin={handleLogin}></LoginForm>
             </>
         )
     } else {
@@ -33,6 +52,9 @@ function App() {
                 <h2> User-id: {getCurrentUser().id} </h2>
                 <GameTable></GameTable>
                 <button onClick={handleLogout}> Logout </button>
+                <br/>
+                <h2> Top </h2>
+                <TopTable gamesTop={gamesTop}></TopTable>
             </>
         )
     }

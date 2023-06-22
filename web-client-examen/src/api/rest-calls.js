@@ -74,8 +74,7 @@ export function logout() {
         });
 }
 
-export function startGame(coordinates) {
-    console.log(coordinates);
+export function startGame() {
     let headers = new Headers();
     headers.append("Accept", "application/json");
     headers.append("Content-Type", "application/json");
@@ -84,8 +83,7 @@ export function startGame(coordinates) {
     let init = {
         method: "POST",
         headers: headers,
-        mode: "cors",
-        body: JSON.stringify(coordinates)
+        mode: "cors"
     };
 
     fetch(GAME_BASE_URL, init)
@@ -93,6 +91,7 @@ export function startGame(coordinates) {
         .then((response) => response.json())
         .then((data) => {
             setGameData(data);
+            console.log(data);
         })
         .catch(error => {
             console.log("Request failed: ", error);
@@ -115,7 +114,32 @@ export function makeMove(coordinates) {
 
     return fetch(GAME_BASE_URL + "/" + getGameData().gameId + "/moves", init)
         .then(status)
-        .then(() => getGameData().activePlayerId = getCurrentUser().id)
+        .then((response) => response.json())
+        .then((data) => {
+            setGameData(data);
+            console.log(getGameData());
+        })
+        .catch(error => {
+            console.log("Request failed: ", error);
+            return Promise.reject(error);
+        });
+}
+
+export function getGamesTop() {
+    let headers = new Headers();
+    headers.append("Accept", "application/json");
+    headers.append("Content-Type", "application/json");
+    headers.append("Session-Id", getSessionId());
+
+    let init = {
+        method: "GET",
+        headers: headers,
+        mode: "cors"
+    };
+
+    return fetch(GAME_BASE_URL, init)
+        .then(status)
+        .then((response) => response.json())
         .catch(error => {
             console.log("Request failed: ", error);
             return Promise.reject(error);

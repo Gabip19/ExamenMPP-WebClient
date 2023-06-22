@@ -4,7 +4,7 @@ import {getNotificationHandler} from "./notification-handler.js";
 let websocket = null;
 
 export function openWebSocketConnection() {
-    console.log("Deschid websocket");
+    console.log("[WEB_SOCKET] Opening...");
     console.log(getSessionId());
     console.log(getCurrentUser());
     websocket = new WebSocket(WEB_SOCKET_URL + "/" + getCurrentUser().id);
@@ -12,7 +12,7 @@ export function openWebSocketConnection() {
     let notificationHandler = getNotificationHandler();
 
     websocket.onopen = function(ev) {
-        console.log("Am deschis websocket");
+        console.log("[WEB_SOCKET] OPENED.");
     }
 
     websocket.onerror = function (ev) {
@@ -41,6 +41,8 @@ export function openWebSocketConnection() {
 }
 
 export function closeWebSocket() {
-    if (websocket != null)
+    if (websocket != null) {
+        console.log("[WEB_SOCKET] Closed.")
         websocket.close();
+    }
 }

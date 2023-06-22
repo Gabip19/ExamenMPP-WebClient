@@ -1,9 +1,9 @@
 import {useState} from "react";
-import {login} from "../api/rest-calls.js";
+import {login, startGame} from "../api/rest-calls.js";
 import {getCurrentUser, getSessionId} from "../api/globals.js";
 import {openWebSocketConnection} from "../api/websocket-calls.js";
 
-export default function LoginForm({ setLoggedIn }) {
+export default function LoginForm({ handleLogin }) {
     const [name, setName] = useState("");
 
     function handleSubmit(event) {
@@ -19,12 +19,7 @@ export default function LoginForm({ setLoggedIn }) {
         setName("");
         console.log(credentials);
 
-        login(credentials).then(() => {
-            console.log(getSessionId());
-            console.log(getCurrentUser());
-            setLoggedIn(true);
-            openWebSocketConnection();
-        });
+        handleLogin(credentials);
     }
 
     return (
