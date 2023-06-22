@@ -1,8 +1,8 @@
-export const AUTH_BASE_URL = "http://localhost:8080/game/auth";
+export const AUTH_BASE_URL = "http://localhost:8080/minesweeper/auth";
 export const LOGIN_URL = AUTH_BASE_URL + "/login";
 export const LOGOUT_URL = AUTH_BASE_URL + "/logout";
 export const WEB_SOCKET_URL = "ws://localhost:8080/websocket";
-export const GAME_BASE_URL = "http://localhost:8080/game/games";
+export const GAME_BASE_URL = "http://localhost:8080/minesweeper/games";
 
 
 

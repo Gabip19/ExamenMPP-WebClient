@@ -5,21 +5,18 @@ import {openWebSocketConnection} from "../api/websocket-calls.js";
 
 export default function LoginForm({ setLoggedIn }) {
     const [name, setName] = useState("");
-    const [password, setPassword] = useState("");
 
     function handleSubmit(event) {
         event.preventDefault();
-        if (name === "" || password === "") {
+        if (name === "") {
             return;
         }
 
         let credentials = {
-            name: name,
-            password: password
+            name: name
         };
 
         setName("");
-        setPassword("");
         console.log(credentials);
 
         login(credentials).then(() => {
@@ -40,14 +37,6 @@ export default function LoginForm({ setLoggedIn }) {
                            type="text"
                            onChange={e => setName(e.target.value)}
                            value={name}
-                    />
-                </label> <br/>
-                <label>
-                    <strong> Password: </strong>
-                    <input className="input-field"
-                           type="password"
-                           onChange={e => setPassword(e.target.value)}
-                           value={password}
                     />
                 </label> <br/>
                 <input className="login-btn" type="submit" value="Login" />
