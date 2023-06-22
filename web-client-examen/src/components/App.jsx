@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react'
 import '../css/App.css'
 import LoginForm from "./LoginForm.jsx";
-import {getCurrentUser, getSessionId} from "../api/globals.js";
+import {getCurrentUser, getGameData, getSessionId} from "../api/globals.js";
 import {getGamesTop, login, logout, startGame} from "../api/rest-calls.js";
 import GameTable from "./GameTable.jsx";
 import TopTable from "./TopTable.jsx";
@@ -10,7 +10,8 @@ import {getNotificationHandler} from "../api/notification-handler.js";
 
 function App() {
     const [loggedIn, setLoggedIn] = useState(false);
-    const [gamesTop, setGamesTop] = useState([{"gameId":"0", "player":{"name":"-"},"score":0, "duration":0}]);
+    const [gamesTop, setGamesTop] = useState([{"gameId":"0", "player":{"name":"-"},"totalSum":0, "startTime":""}]);
+    const [tableconfig, setTableConfig] = useState([{}]);
 
     let notificationHandler = getNotificationHandler();
     notificationHandler.setGameEndedCallBack(setGamesTop);
@@ -32,7 +33,8 @@ function App() {
             openWebSocketConnection();
         }).then(() => {
             getGamesTop().then((games) => setGamesTop(games));
-        }).then(() => startGame());
+        }).then(() => startGame())
+            .then(() => setTableConfig(getGameData().configuration));
     }
 
     function handleLogout() {
@@ -45,12 +47,12 @@ function App() {
                 <LoginForm handleLogin={handleLogin}></LoginForm>
             </>
         )
-    } else {
+    } else  {
         return (
             <>
                 <h1> GAME </h1>
                 <h2> User-id: {getCurrentUser().id} </h2>
-                <GameTable></GameTable>
+                <GameTable configuration={tableconfig}></GameTable>
                 <button onClick={handleLogout}> Logout </button>
                 <br/>
                 <h2> Top </h2>

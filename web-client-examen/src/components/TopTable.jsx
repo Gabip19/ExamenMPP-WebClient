@@ -6,8 +6,8 @@ function TopRow({game}){
     return (
         <tr>
             <td>{game.player.name}</td>
-            <td>{game.score}</td>
-            <td>{game.duration}</td>
+            <td>{game.totalSum}</td>
+            <td>{game.startTime}</td>
         </tr>
     );
 }
@@ -26,7 +26,7 @@ export default function TopTable({gamesTop}){
                 <tr>
                     <th>User</th>
                     <th>Score</th>
-                    <th>Duration</th>
+                    <th>Start Time</th>
                 </tr>
                 </thead>
                 <tbody>{rows}</tbody>

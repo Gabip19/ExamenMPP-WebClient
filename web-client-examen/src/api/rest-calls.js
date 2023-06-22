@@ -99,7 +99,7 @@ export function startGame() {
         });
 }
 
-export function makeMove(coordinates) {
+export function makeMove(number) {
     let headers = new Headers();
     headers.append("Accept", "application/json");
     headers.append("Content-Type", "application/json");
@@ -109,7 +109,7 @@ export function makeMove(coordinates) {
         method: "POST",
         headers: headers,
         mode: "cors",
-        body: JSON.stringify(coordinates)
+        body: number
     };
 
     return fetch(GAME_BASE_URL + "/" + getGameData().gameId + "/moves", init)

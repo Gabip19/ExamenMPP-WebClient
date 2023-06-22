@@ -4,7 +4,7 @@ import {getCurrentUser, getGameData} from "../api/globals.js";
 
 let gameStarted = true;
 
-function GameCell( {handleCellClicked, id} ) {
+function GameCell( {handleCellClicked, cell} ) {
     const td = useRef(null);
 
     useEffect(() => {
@@ -29,17 +29,18 @@ function GameCell( {handleCellClicked, id} ) {
     return (
         <td
             ref={td}
-            id={id}
+            id={cell.position}
             onFocus={handleFocus}
             onBlur={handleUnFocus}
             tabIndex="0"
             onClick={handleCellClicked}
         >
+            {cell.value}
         </td>
     );
 }
 
-export default function GameTable() {
+export default function GameTable({configuration}) {
     let coordinates = {"x":0, "y":0};
     let clickedCellId = 0;
     const [score, setScore] = useState(0);
@@ -110,28 +111,34 @@ export default function GameTable() {
         }
     }
 
-    function showMines(mines) {
-        mines.forEach((coord) => {
-            let cellId = coord.x * 10 + coord.y;
-            document.getElementById(cellId).classList.add("hit-cell");
+    function handleBtnClicked() {
+        if (getGameData().generationNumber <= 3) {
+            let number = 1 + Math.floor(Math.random() * 3);
+
+            makeMove(number).then(() => showOwnedCells());
+        }
+    }
+
+    function showOwnedCells() {
+        console.log("Showing cells");
+        getGameData().configuration.forEach((cell) => {
+            if (cell.owned === true) {
+                document.getElementById(cell.position).classList.add("hit-cell");
+            }
         })
     }
 
     const tbody = () => {
-        let content = [];
-        for (let i = 1; i <= 4; i++) {
-            let cells = [];
-            for (let j = 1; j <= 4; j++) {
-                cells.push(
-                    <GameCell key={i * 10 + j}
-                              id={i * 10 + j}
-                              handleCellClicked={() => handleCellClicked(i * 10 + j)}
-                    />
-                )
-            }
-            content.push(<tr key={"row"+i}>{cells}</tr>);
-        }
-        return content;
+        let cells = [];
+        configuration.forEach((cell) => {
+            cells.push(
+                <GameCell key={cell.position}
+                          cell={cell}
+                          handleCellClicked={() => handleCellClicked(i)}
+                />
+            );
+        });
+        return <tr key={"row"}>{cells}</tr>;
     }
 
     return (
@@ -144,6 +151,7 @@ export default function GameTable() {
                     </tbody>
                 </table>
             </div>
+            <button onClick={handleBtnClicked}>Generate</button>
         </>
     );
 }
