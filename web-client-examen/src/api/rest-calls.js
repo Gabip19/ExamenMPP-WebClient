@@ -1,5 +1,5 @@
 import {
-    GAME_BASE_URL, getCurrentUser, getGameData,
+    GAME_BASE_URL, getGameData,
     getSessionId,
     LOGIN_URL,
     LOGOUT_URL,

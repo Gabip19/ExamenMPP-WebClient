@@ -118,20 +118,16 @@ export default function GameTable() {
     }
 
     const tbody = () => {
-        let content = [];
-        for (let i = 1; i <= 4; i++) {
-            let cells = [];
-            for (let j = 1; j <= 4; j++) {
-                cells.push(
-                    <GameCell key={i * 10 + j}
-                              id={i * 10 + j}
-                              handleCellClicked={() => handleCellClicked(i * 10 + j)}
-                    />
-                )
-            }
-            content.push(<tr key={"row"+i}>{cells}</tr>);
+        let cells = [];
+        for (let i = 0; i < 10; i++) {
+            cells.push(
+                <GameCell key={i}
+                          id={i}
+                          handleCellClicked={() => handleCellClicked(i)}
+                />
+            )
         }
-        return content;
+        return <tr key={"row"}>{cells}</tr>;
     }
 
     return (
